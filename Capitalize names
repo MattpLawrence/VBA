@@ -1,0 +1,4 @@
+'Capitalize first letter of name
+'Matthew Lawrence 06-22-2021
+
+Me.txtEmail.Value = UCase(Left(Me.txtEmail.Value, 1)) & Mid(Me.txtEmail.Value, 2)
