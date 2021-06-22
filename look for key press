@@ -1,0 +1,5 @@
+    If KeyCode = 13 Then 'if enter key is pressed then move the value on, this way the tab event still jumps to next event
+          Call Me.btnAddTrainee_Click
+          DoCmd.CancelEvent
+    End If
+    Exit Sub
