@@ -1,0 +1,67 @@
+Function LogError(ByVal lngErrNumber As Long, ByVal strErrDescription As String, _
+    strCallingProc As String, Optional vParameters, Optional bShowUser As Boolean = True) As Boolean
+On Error GoTo Err_LogError
+    ' Purpose: Generic error handler.
+    ' Logs errors to table "tLogError".
+    ' Arguments: lngErrNumber - value of Err.Number
+    ' strErrDescription - value of Err.Description
+    ' strCallingProc - name of sub|function that generated the error.
+    ' vParameters - optional string: List of parameters to record.
+    ' bShowUser - optional boolean: If False, suppresses display.
+    ' Author: Allen Browne, allen@allenbrowne.com
+    ' Modified for this Database by Matthew Lawrence
+    '06-22-2021
+
+    Dim strMsg As String      ' String for display in MsgBox
+    Dim rst As DAO.Recordset  ' The tLogError table
+    Dim strUsername As String
+'Look up current username from login table
+strUsername = DLookup("fldUsername", "tblLoginCredentials", "[fldDate]=#" & Format(DMax("[fldDate]", "tblLoginCredentials")) & "#")
+   
+    Select Case lngErrNumber
+    Case 0
+        Debug.Print strCallingProc & " called error 0."
+    Case 2501                ' Cancelled
+        'Do nothing.
+    Case 3314, 2101, 2115    ' Can't save.
+        If bShowUser Then
+            strMsg = "Record cannot be saved at this time." & vbCrLf & _
+                "Complete the entry, or press <Esc> to undo."
+            MsgBox strMsg, vbExclamation, strCallingProc
+        End If
+    Case Else
+        If bShowUser Then
+            strMsg = "Error " & lngErrNumber & ": " & strErrDescription
+            DoCmd.OpenForm "frmErrorHandler", acNormal, , , acFormReadOnly, acWindowNormal
+            Forms!frmErrorHandler.txtErrorNumber.Value = lngErrNumber
+            Forms!frmErrorHandler.txtErrorDescription.Value = strErrDescription
+            Forms!frmErrorHandler.Refresh
+        End If
+        Set rst = CurrentDb.OpenRecordset("tblErrorLog", , dbAppendOnly)
+        rst.AddNew
+            rst![fldErrorNumber] = lngErrNumber
+            rst![fldDescription] = Left$(strErrDescription, 255)
+            rst![fldDate] = Now()
+            rst![fldEvent] = strCallingProc
+            rst![fldUserName] = strUsername 'Set to current username
+            If Not IsMissing(vParameters) Then
+                rst![fldForm] = Left(vParameters, 255)
+            End If
+        rst.Update
+        rst.close
+        LogError = True
+    End Select
+
+Exit_LogError:
+    Set rst = Nothing
+    End
+
+Err_LogError:
+    strMsg = "An unexpected situation arose in your program." & vbCrLf & _
+        "Please write down the following details:" & vbCrLf & vbCrLf & _
+        "Calling Proc: " & strCallingProc & vbCrLf & _
+        "Error Number " & lngErrNumber & vbCrLf & strErrDescription & vbCrLf & vbCrLf & _
+        "Unable to record because Error " & Err.Number & vbCrLf & Err.Description
+    MsgBox strMsg, vbCritical, "LogError()"
+    Resume Exit_LogError
+End Function
