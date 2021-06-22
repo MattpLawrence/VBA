@@ -1,4 +1,10 @@
-                                        '************loop to find duplicate record and change password once found********************
+Dim dbLogin As DAO.Database 'Dim DB
+Dim rs As DAO.Recordset 'Dim RS
+
+Set dbLogin = CurrentDb 'Set Database
+Set rs = dbLogin.OpenRecordset("tblLoginCredentials", dbOpenDynaset) 'Set Record set
+    
+                    '************loop to find duplicate record and change password once found********************
                                         rs.MoveFirst 'move to first record
                                         Do Until rs.EOF ' do until last record
                                             If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
