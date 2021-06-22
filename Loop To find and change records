@@ -1,9 +1,9 @@
                                         '************loop to find duplicate record and change password once found********************
-                                        rs.MoveFirst
-                                        Do Until rs.EOF
-                                            If rs!fldUserName = Me.txtUserName.Value Then
+                                        rs.MoveFirst 'move to first record
+                                        Do Until rs.EOF ' do until last record
+                                            If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
                                                 rs.Edit
-                                                rs!fldPassword = Me.txtPassword.Value
+                                                rs!fldPassword = Me.txtPassword.Value 'once desired record is found, change this parameter
                                                 rs.Update
                                             End If
                                             rs.MoveNext
