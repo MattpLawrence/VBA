@@ -29,6 +29,9 @@ If KeyCode = 8 Then 'if enter key is pressed then move the value on, this way th
             Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
             DoCmd.CancelEvent
         End If
+            If Len(Me.txtSearchPhone.Text) = 12 Then 'check to see if number is filled
+                Exit Sub 'exit so another character doesnt get deleted
+            End If
     End If
 End If
 '************************** limit value to only 12 characters ****************************
