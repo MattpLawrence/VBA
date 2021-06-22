@@ -1,0 +1,8 @@
+Dim NewMenu As Object
+
+On Error Resume Next
+CommandBars("customsm").Delete
+
+Set NewMenu = CommandBars.Add("customsm", 5, False, True)
+
+NewMenu.Controls.Add 1, 106, , , True 'Close
