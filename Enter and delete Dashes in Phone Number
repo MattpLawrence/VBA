@@ -1,0 +1,35 @@
+Private Sub txtPhoneNumber_KeyDown(KeyCode As Integer, Shift As Integer)
+'automatically enter dashes intpo phone number and delete if needed
+'Matthew Lawrence 06-22-2021
+On Error GoTo ErrorExit
+
+If Len(Me.txtPhoneNumber.Text) = 3 Then ' when number of charictors = 3 then add "-"
+    Me.txtPhoneNumber.Text = Me.txtPhoneNumber.Text + "-"
+    Me.txtPhoneNumber.SelStart = Len(Me.txtPhoneNumber.Text) ' set focus back at end of text string
+    Me.txtPhoneNumber.SetFocus
+End If
+    If Len(Me.txtPhoneNumber.Text) = 7 Then ' when number of charictors = 7 then add "-"
+        Me.txtPhoneNumber.Text = Me.txtPhoneNumber.Text + "-"
+        Me.txtPhoneNumber.SelStart = Len(Me.txtPhoneNumber.Text) ' set focus back at end of text string
+        Me.txtPhoneNumber.SetFocus
+    End If
+    
+'********************** if backspace is pressed at dashes, delete two characters ********************
+
+    If KeyCode = 8 Then 'if enter key is pressed then move the value on, this way the tab event still jumps to next event
+        If Len(Me.txtPhoneNumber.Text) = 4 Then
+          Me.txtPhoneNumber.Text = Left(Me.txtPhoneNumber.Text, Len(Me.txtPhoneNumber.Text) - 2) 'subtract two to get past dashes
+          DoCmd.CancelEvent
+        Else
+            If Len(Me.txtPhoneNumber.Text) = 8 Then
+                Me.txtPhoneNumber.Text = Left(Me.txtPhoneNumber.Text, Len(Me.txtPhoneNumber.Text) - 2) 'subtract two to get past dashes
+                DoCmd.CancelEvent
+            End If
+        End If
+    End If
+    Exit Sub
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "txtPhoneNumber_KeyDown", "frmCustomer")
+End Sub
