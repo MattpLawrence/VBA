@@ -3,16 +3,19 @@ Private Sub txtMailCheckBox_Click()
 'Matthew Lawrence 06-23-2021
 On Error GoTo ErrorExit
 
+'Create an invisibly small txtBox called "txtFocus"
+Me.txtFocus.SetFocus 'set focus on small textbox to stop curser from showing
+
 If IsNull(Me.txtMailCheckBox.Value) = True Then 'If empty poulate with an x
     Me.txtMailCheckBox.Value = "X"
+    Me.txtFocus.SetFocus
+    
 Else
     Me.txtMailCheckBox.Value = Null 'If it has an x then clear
+    Me.txtFocus.SetFocus
 End If
 
 Me.txtMailList.Value = Me.txtMailCheckBox.Value 'transfer value to txtbox that has control source.
-
-'Create an invisibly small txtBox called "txtFocus"
-' set on change value to "me.txtFocus.SetFocus" in order to get rid of the cursor
 
 Exit Sub
 
