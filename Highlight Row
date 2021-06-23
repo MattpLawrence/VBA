@@ -1,0 +1,14 @@
+Private Sub Form_Current()
+'Code to highlight a row in a continuous form
+'Matthew Lawrence 05-19-2021
+With Me
+    .txtCurrent = Nz(.txtPrimaryKey, 0)
+End With
+
+'Put invisible txtBox called "txtCurrent" in form footer
+'put Invisible txtBox called "txtPrimaryKey" in from detail and set control source to primary key
+'Put TextBox behind all other textboxes and call it "txtColor"
+'Set Background color of all information textboxes to the desired highlight color, then set background to "transparent"
+'Set Conditional formating of "txtColor" to "expression is" "Nz([txtPrimaryKey],0)=[txtCurrent]
+    'then select background of conditional formatting to same color selected for background of other textboxes
+End Sub
