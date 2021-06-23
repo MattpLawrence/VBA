@@ -1,0 +1,28 @@
+'Reset chciklist to zero values
+'Matthew Lawrence 05-26-2021
+On Error GoTo ErrorExit ' Tells program what to do when error happens
+
+Dim dbTraining As DAO.Database 'Dim DB
+Dim rs As DAO.Recordset 'Dim RS
+
+Set dbTraining = CurrentDb 'Set Database
+Set rs = dbTraining.OpenRecordset("tblChecklistMaster") 'Set Record set
+
+'Start loop to go through and change all record values to 0
+If Not (rs.EOF And rs.BOF) Then 'if not the begeining or end then:
+    rs.MoveFirst 'Go tot first record
+    Do Until rs.EOF = True 'Keep looping until the last record
+        rs.Edit 'Open recordset to edits
+        rs("fldScore").Value = "0" 'Edit the value to equal 0
+        rs.Update 'Update the recordset with new value
+        rs.MoveNext 'Move to next record when edit is complete
+    Loop 'Close loop
+End If
+rs.close 'Close Record set
+Set rs = Nothing 'Clean up and set to nothing
+
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "Form_Close", "frmTrainingCheckList")
+End Sub
