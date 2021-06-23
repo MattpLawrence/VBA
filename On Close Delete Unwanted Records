@@ -1,0 +1,30 @@
+Private Sub Form_Close()
+'Search for and delete accidentally saved records
+'Matthew Lawrence 06-23-2021
+On Error GoTo ErrorExit
+
+Dim dbTraining As DAO.Database 'Dim DB
+Dim rs As DAO.Recordset 'Dim RS
+
+Set dbTraining = CurrentDb 'Set Database
+Set rs = dbTraining.OpenRecordset("tblCustomers") 'Set Record set to desired table
+
+'********************Search for any record saved with a Null check value and delete************************
+If Not (rs.EOF And rs.BOF) Then 'if not the begeining or end then:
+    rs.MoveFirst 'Go tot first record
+    Do Until rs.EOF = True 'Keep looping until the last record
+        If IsNull(rs![fldCheck]) = True Then 'find records with check
+            rs.Delete
+        End If
+        rs.MoveNext 'Move to next record when delete is complete
+    Loop 'Close loop
+End If
+
+rs.Close 'Close Record set
+Set rs = Nothing 'Clean up and set to nothing
+
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "Form_Close", "frmCustomer")
+End Sub
