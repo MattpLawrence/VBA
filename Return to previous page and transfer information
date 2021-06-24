@@ -1,0 +1,22 @@
+Private Sub btnReturnToCheckOut_Click()
+'Take information and return to previous page
+'Matthew Lawrence 06-22-2021
+On Error GoTo ErrorExit
+
+Dim strName As String ' set up string name to transfer name
+
+'use Dlookup to find the name of the customer currently highlighted on the subform
+strPath = DLookup("fldCustomerFirstName", "tblCustomers", "fldPrimaryKey=" & Forms!frmCustomer!sbfrmFindCustomer!txtPrimaryKey) _
+        & " " & DLookup("fldCustomerLastName", "tblCustomers", "fldPrimaryKey=" & Forms!frmCustomer!sbfrmFindCustomer!txtPrimaryKey)
+
+DoCmd.OpenForm "frmCheckOut", acNormal
+    Forms!frmCheckOut!txtCustomerName.Value = strPath 'transfer name
+    Forms!frmCheckOut!txtPrimaryKey.Value = Forms!frmCustomer!sbfrmFindCustomer!txtPrimaryKey 'transfer primary key
+    DoCmd.Close acForm, "frmCustomer"
+
+    
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "btnReturnToCheckOut_Click", "frmCustomer")
+End Sub
