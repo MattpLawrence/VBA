@@ -3,8 +3,6 @@ Private Sub txtSearchPhone_KeyDown(KeyCode As Integer, Shift As Integer)
 'Matthew Lawrence 06-22-2021
 On Error GoTo ErrorExit
 
-On Error GoTo ErrorExit
-
 If Len(Me.txtSearchPhone.Text) = 3 Then ' when number of charictors = 3 then add "-"
     Me.txtSearchPhone.Text = Me.txtSearchPhone.Text + "-"
     Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
