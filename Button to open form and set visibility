@@ -1,0 +1,35 @@
+Private Sub btnCurrentMember_Click()
+' Open form and set visiblity of objects
+' Matthew lawrence 06-24-2021
+On Error GoTo ErrorExit
+DoCmd.OpenForm "frmCustomer", acNormal 'Open form
+    Forms!frmCustomer!txtSearchFirst.SetFocus ' set focus on search box instead of default
+'****************** set all unwanted controls to invisible***************
+    Forms!frmCustomer!txtFirstName.Visible = False
+    Forms!frmCustomer!txtLastName.Visible = False
+    Forms!frmCustomer!txtEmail.Visible = False
+    Forms!frmCustomer!txtPhoneNumber.Visible = False
+    Forms!frmCustomer!txtMailCheckBox.Visible = False
+    Forms!frmCustomer!Label6.Visible = False
+    Forms!frmCustomer!Label10.Visible = False
+    Forms!frmCustomer!Label11.Visible = False
+    Forms!frmCustomer!Label12.Visible = False
+    Forms!frmCustomer!Label13.Visible = False
+    Forms!frmCustomer!Label32.Visible = False
+    Forms!frmCustomer!Label46.Visible = False
+    Forms!frmCustomer!Label45.Visible = False
+    Forms!frmCustomer!Label44.Visible = False
+    Forms!frmCustomer!btnClear.Visible = False
+    Forms!frmCustomer!btnSave.Visible = False
+'********************Set wanted controls to visible*****************************
+    Forms!frmCustomer!btnReturnToCheckOut.Visible = True
+    Forms!frmCustomer!lblReturnToCheckOut.Visible = True
+    
+    
+
+    
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "btnCurrentMember_Click", "frmCheckOut")
+End Sub
