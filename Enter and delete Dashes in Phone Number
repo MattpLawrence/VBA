@@ -16,7 +16,7 @@ End If
     
 '********************** if backspace is pressed at dashes, delete two characters ********************
 
-If KeyCode = 8 Then 'if enter key is pressed then move the value on, this way the tab event still jumps to next event
+If KeyCode = 8 Then 'if backspace button is pressed.
     If Len(Me.txtSearchPhone.Text) = 4 Then
       Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 2) 'subtract two to get past dashes
       Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
