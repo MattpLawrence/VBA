@@ -1,5 +1,5 @@
 Private Sub txtSearchPhone_KeyDown(KeyCode As Integer, Shift As Integer)
-'Automatically enter dashes intpo phone number and delete if needed
+'Automatically enter dashes into phone number and delete if needed
 'Matthew Lawrence 06-22-2021
 On Error GoTo ErrorExit
 
