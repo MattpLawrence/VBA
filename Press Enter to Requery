@@ -3,7 +3,7 @@ Private Sub txtSearchFirst_KeyDown(KeyCode As Integer, Shift As Integer)
 'Matthew Lawrence 05-19-2021
 On Error GoTo ErrorExit
 
-If KeyCode = 13 Then 'if enter key is pressed then move the value on, this way the tab event still jumps to next event
+If KeyCode = 13 Then 'if enter key is pressed then Trigger desired event.
     Me.btnFilter.SetFocus 'Set focus on something else in order to make the text register for the query
     Me.sbfrmFindCustomer.Requery 'requery the subform
     Me.txtSearchFirst.SetFocus 'Set focus back on the search bar
