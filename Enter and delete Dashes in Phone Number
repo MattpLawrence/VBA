@@ -1,5 +1,5 @@
 Private Sub txtSearchPhone_KeyDown(KeyCode As Integer, Shift As Integer)
-'Automatically enter dashes into phone number and delete if needed
+'Automatically enter dashes intpo phone number and delete if needed
 'Matthew Lawrence 06-22-2021
 On Error GoTo ErrorExit
 
@@ -7,39 +7,83 @@ If Len(Me.txtSearchPhone.Text) = 3 Then ' when number of charictors = 3 then add
     Me.txtSearchPhone.Text = Me.txtSearchPhone.Text + "-"
     Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
     Me.txtSearchPhone.SetFocus
-End If
+Else
     If Len(Me.txtSearchPhone.Text) = 7 Then ' when number of charictors = 7 then add "-"
         Me.txtSearchPhone.Text = Me.txtSearchPhone.Text + "-"
         Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
         Me.txtSearchPhone.SetFocus
     End If
+End If
     
 '********************** if backspace is pressed at dashes, delete two characters ********************
 
-If KeyCode = 8 Then 'if backspace button is pressed.
-    If Len(Me.txtSearchPhone.Text) = 4 Then
-      Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 2) 'subtract two to get past dashes
-      Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
-      DoCmd.CancelEvent
+If KeyCode = 8 Then 'if backspace is pressed at zero then do nothing
+    If Len(Me.txtSearchPhone.Text) = 0 Then
+        Exit Sub
     Else
-        If Len(Me.txtSearchPhone.Text) = 8 Then
-            Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 2) 'subtract two to get past dashes
-            Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
-            DoCmd.CancelEvent
-        End If
-            If Len(Me.txtSearchPhone.Text) = 12 Then 'check to see if number is filled
-                Exit Sub 'exit so another character doesnt get deleted
+        If Len(Me.txtSearchPhone.Text) = 4 Then 'if enter key is pressed then move the value on, this way the tab event still jumps to next event
+          Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 2) 'subtract two to get past dashes
+          DoCmd.CancelEvent
+          
+        Else
+            If Len(Me.txtSearchPhone.Text) = 8 Then
+                Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 2) 'subtract two to get past dashes
+                Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text)
+                'DoCmd.CancelEvent
             End If
+                If Len(Me.txtSearchPhone.Text) = 12 Then 'check to see if number is filled to 12
+                    Exit Sub 'exit so another character doesnt get deleted
+                End If
+        End If
     End If
-End If
-'************************** limit value to only 12 characters ****************************
-If Len(Me.txtSearchPhone.Text) >= 12 Then
-    Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 1)
-    Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text) ' set focus back at end of text string
+    Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text)
+    Exit Sub
 End If
 
+'*************************Requery on press enter **************************************
+If KeyCode = 13 Then 'if enter key is pressed then move the value on, this way the tab event still jumps to next event
+    Me.btnFilter.SetFocus 'Set focus on something else in order to make the text register for the query
+    Me.sbfrmFindCustomer.Requery 'requery the subform
+    Me.txtSearchPhone.SetFocus 'Set focus back on the search bar
+    DoCmd.CancelEvent
+End If
 Exit Sub
+'              ********** put the following code in Key Up event ***********
+
+
+'On Error GoTo ErrorExit
+'
+'If KeyCode = 8 Then 'if backspace is pressed at zero then do nothing
+'    Exit Sub
+'End If
+'
+''************************** limit value to only 12 characters ****************************
+'If Len(Me.txtSearchPhone.Text) >= 13 Then
+'    Me.txtSearchPhone.Text = Left(Me.txtSearchPhone.Text, Len(Me.txtSearchPhone.Text) - 1)
+'    Me.txtSearchPhone.SelStart = Len(Me.txtSearchPhone.Text)
+'End If
+''************************* Check for anything thats not a number *****************************
+'If KeyCode >= 46 And KeyCode <= 57 Then
+'    Exit Sub
+'Else
+'    If KeyCode >= 96 And KeyCode <= 105 Then
+'        Exit Sub
+'    End If
+'End If
+'
+'
+'
+'ErrorExit:
+'If Err.Number = 5 Then
+'    Exit Sub
+'End If
+'Call LogError(Err.Number, Err.Description, "txtSearchPhone_KeyUp", "frmCustomer")
+
 
 ErrorExit:
+If Err.Number = 5 Then ' if delete key is pressed at zero length
+    Exit Sub
+End If
+
 Call LogError(Err.Number, Err.Description, "txtSearchPhone_KeyDown", "frmCustomer")
 End Sub
