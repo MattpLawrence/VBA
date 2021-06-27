@@ -1,0 +1,65 @@
+Private Sub btnCheckOut_Click()
+'Final save check box and update inventory
+'Matthew Lawrence 06-26-2021
+
+On Error GoTo ErrorExit
+
+
+
+Dim db As DAO.Database 'Dim DB
+Dim rs As DAO.Recordset 'Dim RS
+Dim rsInventory As DAO.Recordset 'Dim RS
+Dim strQuantity As String
+Dim strItemPrimaryKey As String
+
+Set db = CurrentDb 'Set Database
+Set rs = db.OpenRecordset("tblPurchaseRecords") 'Set Record set
+Set rsInventory = db.OpenRecordset("tblInventory") 'Set Record set
+
+'Start loop to go through and change records
+If Not (rs.EOF And rs.BOF) Then 'if not the begeining or end then:
+    rs.MoveFirst 'Go tot first record
+    Do Until rs.EOF = True 'Keep looping until the last record
+        If rs![fldPurchasePrimaryKey] = Me.txtPurchasePrimaryKey Then
+            rs.Edit 'Open recordset to edits
+            rs("fldCheck").Value = "1" 'Edit the value to equal 1
+            rs.Update 'Update the recordset with new value
+            
+'*******************start info and loop to update inventory*******************
+            strQuantity = rs("fldPurchaseQuantity").Value
+            strItemPrimaryKey = rs("fldItemPrimaryKey").Value
+            If Not (rsInventory.EOF And rsInventory.BOF) Then 'if not the begeining or end then:
+                rsInventory.MoveFirst 'Go tot first record
+                Do Until rsInventory.EOF = True 'Keep looping until the last record
+                    If rsInventory![fldPrimaryKey] = strItemPrimaryKey Then
+                        rsInventory.Edit
+                        rsInventory("fldCurrentQuantity").Value = rsInventory("fldCurrentQuantity").Value - strQuantity
+                        rsInventory.Update
+                    End If
+                    rsInventory.MoveNext
+                Loop
+            End If
+
+        End If
+        rs.MoveNext 'Move to next record when edit is complete
+    Loop 'Close loop
+End If
+rs.Close 'Close Record set
+Set rs = Nothing 'Clean up and set to nothing
+
+DoCmd.OpenReport "rptReceipt", acViewReport
+MsgBox "Thank Your For Your Purchase,"
+Reports!rptReceipt!txtTotal.Value = Me.txtTotal.Value
+DoCmd.Close acForm, "frmUpdateCart", acSaveYes
+Forms!frmCheckOut!txtCustomerName.Value = Null
+Forms!frmCheckOut!txtPrimaryKey.Value = Null
+
+
+
+
+
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "btnCheckOut_Click", "sbfrmCurrentCart")
+End Sub
