@@ -1,4 +1,5 @@
-'Login Form With three permision levels by Matthew Lawrence 03-17-2021
+'Login Form With three permision levels
+'Matthew Lawrence 07-01-2021
 
 Public Sub btnLogIn_Click()
 On Error GoTo ErrorExit 'Error handler and log
@@ -11,11 +12,11 @@ Dim queryNameOrSQL As String ' Query string to select all records from user Tabl
 Dim varpassword As String ' to store password entered in password textbox on login form
 Dim varloginid, varlevelid As Integer
 Dim dbLogin As DAO.Database 'Dim DB
-Dim rsLogin As DAO.Recordset 'Dim RS
+Dim rs As DAO.Recordset 'Dim RS
 
 
 Set dbLogin = CurrentDb 'Set Database
-Set rsLogin = dbLogin.OpenRecordset("tblLoginCredentials", dbOpenDynaset) 'Set Record set to change login date
+Set rs = dbLogin.OpenRecordset("tblLoginCredentials", dbOpenDynaset) 'Set Record set to change login date
 
 queryNameOrSQL = "select * from tblLogInCredentials" 'Extract records from tblLogIn table
 
@@ -48,21 +49,18 @@ For i = 1 To rs.RecordCount
         
         If pubvarlevelid = 1 Then
         
-        varloginid = rs![fldUserName]
-        varlevelid = rs![fldLevel]
-        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
         
             DoCmd.ShowToolbar "Ribbon", acToolbarYes ' level 1 user has full access to tool bar
             DoCmd.OpenForm "frmHome", acNormal, , , acFormEdit ' allows this level of user to edit the form
             MsgBox " Welcome to DataBase" & vbNewLine & "        ~Admin~", vbInformation, "Qos"
 
             '************loop to find username and change last login date********************
-                rsLogin.MoveFirst 'move to first record
+                rs.MoveFirst 'move to first record
                 Do Until rs.EOF ' do until last record
-                    If rsLogin!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
-                        rsLogin.Edit
-                        rsLogin!fldDate = Now() 'once desired record is found, change this parameter
-                        rsLogin.Update
+                    If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
+                        rs.Edit
+                        rs!fldDate = Now() 'once desired record is found, change this parameter
+                        rs.Update
                     End If
                     rs.MoveNext
                 Loop
@@ -138,4 +136,3 @@ Exit Sub
 
 ErrorExit:
 Call LogError(Err.Number, Err.Description, "btnLogIn", "frmLogin")
-
