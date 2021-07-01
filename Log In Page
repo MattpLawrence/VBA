@@ -1,0 +1,132 @@
+'Login Form With three permision levels
+'Loop to log last user log in date
+'Matthew Lawrence 06-24-2021
+
+Public Sub btnLogIn_Click()
+On Error GoTo ErrorExit 'Error handler and log
+
+
+Dim recount As Integer ' to count records in user table
+Dim varusername As String ' to store username entered in username textbox
+Dim rsCount, i As Integer ' Variable to be used in For loop
+Dim queryNameOrSQL As String ' Query string to select all records from user Table
+Dim varpassword As String ' to store password entered in password textbox on login form
+Dim varloginid, varlevelid As Integer
+Dim dbLogin As DAO.Database 'Dim DB
+Dim rs As DAO.Recordset 'Dim RS
+
+Set dbLogin = CurrentDb 'Set Database
+Set rs = dbLogin.OpenRecordset("tblLoginCredentials", dbOpenDynaset) 'Set Record set to change login date
+
+queryNameOrSQL = "select * from tblLogInCredentials" 'Extract records from tblLogIn table
+
+Set db = CurrentDb ' set current databse to process records
+Set rs = db.OpenRecordset(queryNameOrSQL)  'open recordset wich brings all records of tblLogIn table
+
+   
+rs.MoveLast ' move pointer to Last record to get total quantitiy of records
+    
+    
+rs.MoveFirst ' Move pointer to First record so that the for loop will start at 1st record
+
+txtUserName = Nz([txtUserName], 3)
+txtUserName.SetFocus
+varusername = txtUserName.Text
+
+
+
+txtPassword = Nz([txtPassword], 3)
+txtPassword.SetFocus
+varpassword = txtPassword
+
+
+
+For i = 1 To rs.RecordCount
+    If varusername = rs![fldUserName] And varpassword = rs![fldPassword] Then
+        pubvarlevelid = rs![fldLevel] ' storing user level in public Variable for this and future use
+                
+        If pubvarlevelid = 1 Then
+        
+        varloginid = rs![fldUserName]
+        varlevelid = rs![fldLevel]
+        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
+        
+            DoCmd.ShowToolbar "Ribbon", acToolbarYes ' level 1 user has full access to tool bar
+            DoCmd.OpenForm "frmHome", acNormal, , , acFormEdit ' allows this level of user to edit the form
+            MsgBox " Welcome to DataBase" & vbNewLine & "        ~Admin~", vbInformation, "Qos"
+                '************loop to find username and change last login date********************
+                rs.MoveFirst 'move to first record
+                Do Until rs.EOF ' do until last record
+                    If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
+                        rs.Edit
+                        rs!fldDate = Now() 'once desired record is found, change this parameter
+                        rs.Update
+                    End If
+                    rs.MoveNext
+                Loop
+            DoCmd.Close acForm, "frmLogin", [acSaveYes]  'closes and saves login form
+            DoCmd.SelectObject acTable, , True ' this shows the navigation ribbon
+                    
+        ElseIf pubvarlevelid = 2 Then
+        
+        varloginid = rs![fldUserName]
+        varlevelid = rs![fldLevel]
+        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
+            
+            DoCmd.ShowToolbar "Ribbon", acToolbarNo ' level 2 user has no access to tool bar
+            MsgBox " Welcome to DataBase" & vbNewLine & "      ~Employee~", vbInformation, "Qos"
+'            DoCmd.OpenForm "frmHome", acNormal, , , , acHidden 'opens home in hidden view to make sure new user button is invisible
+                '************loop to find username and change last login date********************
+                rs.MoveFirst 'move to first record
+                Do Until rs.EOF ' do until last record
+                    If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
+                        rs.Edit
+                        rs!fldDate = Now() 'once desired record is found, change this parameter
+                        rs.Update
+                    End If
+                    rs.MoveNext
+                Loop
+'            Forms!home!btnNewUser.Visible = False 'Dont Show new user button
+            DoCmd.OpenForm "frmHome", acNormal, , , acFormEdit ' allows this level of user to add to the form
+            DoCmd.Close acForm, "frmLogin", acSaveYes 'closes and saves login form
+            DoCmd.SelectObject acTable, , True ' this shows the navigation ribbon
+            
+'
+'        ElseIf pubvarlevelid = 3 Then
+'
+'        varloginid = rs![fldUserName]
+'        varlevelid = rs![fldLevel]
+'        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
+'
+'            DoCmd.ShowToolbar "Ribbon", acToolbarNo ' level 3 user has no access to tool bar to enable print
+'            MsgBox " Welcome to Read Only DataBase", vbInformation, "Qos"
+'            DoCmd.OpenForm "frmDocuments3", acNormal, , , acFormEdit ' Allows Edits
+'                '************loop to find username and change last login date********************
+'                rs.MoveFirst 'move to first record
+'                Do Until rs.EOF ' do until last record
+'                    If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
+'                        rs.Edit
+'                        rs!fldDate = Now() 'once desired record is found, change this parameter
+'                        rs.Update
+'                    End If
+'                    rs.MoveNext
+'                Loop
+'            DoCmd.close acForm, "frmLogin", acSaveYes 'closes and saves login form
+'
+'            'DoCmd.NavigateTo "acNavigationCategoryObjectType"   (This code is redundant because of the login forms's Onload event)
+'            'DoCmd.RunCommand acCmdWindowHide ' this hides the navigation ribbon (This code is redundant because of the login forms's Onload event)
+                  
+        End If
+        Exit Sub
+    Else
+        rs.MoveNext
+    End If
+    
+Next
+     MsgBox "User Name and Passoword Not Recognized"
+     
+     ' dont forget to set public sub in new module, for this sub the module is "mvarlogin"
+Exit Sub
+
+ErrorExit:
+Call LogError(Err.Number, Err.Description, "btnLogIn", "frmLogin")
