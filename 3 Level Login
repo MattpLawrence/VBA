@@ -1,5 +1,4 @@
-'Login Form With three permision levels
-'Matthew Lawrence 03-17-2021
+'Login Form With three permision levels by Matthew Lawrence 03-17-2021
 
 Public Sub btnLogIn_Click()
 On Error GoTo ErrorExit 'Error handler and log
@@ -12,10 +11,11 @@ Dim queryNameOrSQL As String ' Query string to select all records from user Tabl
 Dim varpassword As String ' to store password entered in password textbox on login form
 Dim varloginid, varlevelid As Integer
 Dim dbLogin As DAO.Database 'Dim DB
-Dim rs As DAO.Recordset 'Dim RS
+Dim rsLogin As DAO.Recordset 'Dim RS
+
 
 Set dbLogin = CurrentDb 'Set Database
-Set rs = dbLogin.OpenRecordset("tblLoginCredentials", dbOpenDynaset) 'Set Record set to change login date
+Set rsLogin = dbLogin.OpenRecordset("tblLoginCredentials", dbOpenDynaset) 'Set Record set to change login date
 
 queryNameOrSQL = "select * from tblLogInCredentials" 'Extract records from tblLogIn table
 
@@ -50,31 +50,34 @@ For i = 1 To rs.RecordCount
         
         varloginid = rs![fldUserName]
         varlevelid = rs![fldLevel]
-      
+        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
+        
             DoCmd.ShowToolbar "Ribbon", acToolbarYes ' level 1 user has full access to tool bar
             DoCmd.OpenForm "frmHome", acNormal, , , acFormEdit ' allows this level of user to edit the form
-                '************loop to find username and change last login date********************
-                rs.MoveFirst 'move to first record
+            MsgBox " Welcome to DataBase" & vbNewLine & "        ~Admin~", vbInformation, "Qos"
+
+            '************loop to find username and change last login date********************
+                rsLogin.MoveFirst 'move to first record
                 Do Until rs.EOF ' do until last record
-                    If rs!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
-                        rs.Edit
-                        rs!fldDate = Now() 'once desired record is found, change this parameter
-                        rs.Update
+                    If rsLogin!fldUserName = Me.txtUserName.Value Then 'if fld value = txtBox value then edit
+                        rsLogin.Edit
+                        rsLogin!fldDate = Now() 'once desired record is found, change this parameter
+                        rsLogin.Update
                     End If
                     rs.MoveNext
                 Loop
-            MsgBox " Welcome to DataBase" & vbNewLine & "        ~Admin~", vbInformation, "Qos"
-            DoCmd.close acForm, "frmLogin", [acSaveYes]  'closes and saves login form
+            DoCmd.Close acForm, "frmLogin", [acSaveYes]  'closes and saves login form
             DoCmd.SelectObject acTable, , True ' this shows the navigation ribbon
             
         
         ElseIf pubvarlevelid = 2 Then
         
-        varloginid = rs![LoginID]
-        varlevelid = rs![LevelID]
-         
+        varloginid = rs![fldUserName]
+        varlevelid = rs![fldLevel]
+        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
+            
             DoCmd.ShowToolbar "Ribbon", acToolbarNo ' level 2 user has no access to tool bar
-            MsgBox " Welcome to DataBase" & vbNewLine & "        ~Trainer~", vbInformation, "Qos"
+            MsgBox " Welcome to DataBase" & vbNewLine & "      ~Employee~", vbInformation, "Qos"
 '            DoCmd.OpenForm "frmHome", acNormal, , , , acHidden 'opens home in hidden view to make sure new user button is invisible
                 '************loop to find username and change last login date********************
                 rs.MoveFirst 'move to first record
@@ -88,13 +91,14 @@ For i = 1 To rs.RecordCount
                 Loop
 '            Forms!home!btnNewUser.Visible = False 'Dont Show new user button
             DoCmd.OpenForm "frmHome", acNormal, , , acFormEdit ' allows this level of user to add to the form
-            DoCmd.close acForm, "frmLogin", acSaveYes 'closes and saves login form
+            DoCmd.Close acForm, "frmLogin", acSaveYes 'closes and saves login form
+            DoCmd.SelectObject acTable, , True ' this shows the navigation ribbon
             
 '
 '        ElseIf pubvarlevelid = 3 Then
 '
-'        varloginid = rs![LoginID]
-'        varlevelid = rs![LevelID]
+'        varloginid = rs![fldUserName]
+'        varlevelid = rs![fldLevel]
 '        'Call mvarlogin.mlogin(varloginid, varusername, varlevelid)
 '
 '            DoCmd.ShowToolbar "Ribbon", acToolbarNo ' level 3 user has no access to tool bar to enable print
@@ -128,8 +132,10 @@ For i = 1 To rs.RecordCount
     
 Next
      MsgBox "User Name and Passoword Not Recognized"
-
+     
+     ' dont forget to set public sub in new module, for this sub the module is "mvarlogin"
 Exit Sub
 
 ErrorExit:
 Call LogError(Err.Number, Err.Description, "btnLogIn", "frmLogin")
+
