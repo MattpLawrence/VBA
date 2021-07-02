@@ -1,6 +1,8 @@
-'Check to see if query results are empty
-If DCount("*", "FindJSA") = 0 Then
-    MsgBox "No JSA's Found Associated With: " & vbNewLine & vbNewLine & Me.cmbProcess
-    DoCmd.close acForm, "JSA", acSaveYes
-    End
-End If
+        DoCmd.OpenForm "frmFindTrainingRecord", acNormal, , , acFormEdit, acHidden 'Hidden first to check to see if there are query results
+        If DCount("*", "qryFindTrainingRecords") = 0 Then
+            MsgBox "No previous records were found for: " & Me.cmbTraineeName.Value & vbNewLine & vbNewLine & " For the Process of: " & Me.cmbProcess
+            
+            DoCmd.close acForm, "JSA", acSaveYes
+            End
+        End If
+            DoCmd.OpenForm "frmFindTrainingRecord"
