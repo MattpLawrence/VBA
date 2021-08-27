@@ -1,0 +1,28 @@
+Sub imgRotate(inFile As String, outFile As String, degreesRotate As Long) '90, 180, 270
+'Rotate image and save under original name.
+'Matthew Lawrence 09-09-2021
+On Error GoTo ErrorExit
+
+    Dim Img As Object, IP As Object
+    Set Img = CreateObject("WIA.ImageFile") 'create WIA objects
+    Set IP = CreateObject("WIA.ImageProcess")
+    
+    '*************Rename orginal file************************
+    Img.LoadFile inFile 'load origianl file
+    Img.SaveFile outFile 'save as new name without making changes
+    Kill (inFile) 'delete orignal file, as to make the name availible
+    
+    '**************Apply rotation and save as original name*************
+    IP.Filters.Add IP.FilterInfos("RotateFlip").filterid 'setup filter
+    IP.Filters(1).Properties("RotationAngle") = degreesRotate 'Rotate
+    Img.LoadFile outFile 'load image
+    Set Img = IP.Apply(Img) 'apply change
+    Img.SaveFile inFile 'save new image as original name
+    
+
+Exit Sub
+
+ErrorExit:
+DoCmd.Hourglass False
+Call LogError(Err.Number, Err.Description, "imgRotate()", "mdlRotate")
+End Sub
