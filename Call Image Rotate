@@ -1,0 +1,38 @@
+Public Sub btnRotate_Click()
+'Rotate image 90Degrees
+'Matthew Lawrence 08-10-2021
+
+On Error GoTo ErrorExit
+
+Dim strFile As String
+Dim strFileName As String
+Dim dbTraining As DAO.Database 'Dim DB
+Dim rs As DAO.Recordset 'Dim RS
+
+If IsNull(Me.txtPath.Value) = True Then
+    Me.txtFocus.SetFocus
+    Exit Sub
+End If
+DoCmd.Hourglass True 'set wait hourglass to show it's working
+    strFile = Me.txtPath.Value
+    strFileName = Left(strFile, InStrRev(strFile, ".") - 1)
+    Me.txtPathRotate.Value = strFileName + "1.png"
+    
+
+
+If FileCheck(Me.txtPathRotate.Value) Then 'Check to see if save file path is already in use, delete it if so.
+    Kill (Me.txtPathRotate)
+End If
+
+    Call imgRotate(Me.txtPath, Me.txtPathRotate, 90)
+
+Me.txtPictureSelect.SetFocus 'Change focus back and forth to refresh image.
+Me.txtFocus.SetFocus
+DoCmd.Hourglass False
+    
+Exit Sub
+
+ErrorExit:
+DoCmd.Hourglass False
+Call LogError(Err.Number, Err.Description, "btnRotate_Click()", "sbfrmCreateWI")
+End Sub
