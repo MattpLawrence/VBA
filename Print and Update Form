@@ -1,0 +1,115 @@
+'Save work instruction, fill check box, export pdf, send email.
+'Matthew Lawrence 08-10-2021
+Dim dbTraining As DAO.Database 'Dim DB
+Dim rsWI As DAO.Recordset 'Dim RS
+Dim strFile As String
+
+
+On Error GoTo ErrorExit
+
+
+'*****************Check to see if all feilds are filled correctly*********************
+If IsNull(Me.txtTitle.Value) = True Then
+    MsgBox "Please enter a title for this work instruction."
+    Me.txtTitle.SetFocus
+    Exit Sub
+Else
+    If IsNull(Me.cmbProcess) = False Then
+        If IsNull(Me.txtList) = True Then 'Check to see if there is already a name in the list box
+            Me.txtList.Value = Me.cmbProcess.Value 'move the name typed in the first box into the second box
+        Else
+            If IsNull(cmbProcess) = True Then
+                End
+            End If
+            Me.txtList.Value = Me.txtList & ", " & Me.cmbProcess.Value ' add name to what is already there
+        End If
+    Me.cmbProcess.Value = Null
+    Else
+        If IsNull(Me.txtList.Value) = True Then
+            MsgBox "Please enter atleast one process to the list."
+            Me.cmbProcess.SetFocus
+            Exit Sub
+        Else
+            If IsNull(Forms!frmApproveWorkInstructions!sbfrmApproveWIAdd!txtDescription.Value) = False Then
+                MsgBox "Please either finish and submit the current step, or clear it."
+                Me.sbfrmApproveWIAdd.SetFocus ' set focus on the sub form
+                Me.sbfrmApproveWIAdd.Form.txtDescription.SetFocus 'set focus on the object
+                Exit Sub
+            Else
+                If DCount("*", "qryApproveWICurrent") = 0 Then 'if there ar eno current steps entered
+                    MsgBox "Please enter at least one step into the work instruction before continuing."
+                    Me.sbfrmApproveWIAdd.SetFocus ' set focus on the sub form
+                    Me.sbfrmApproveWIAdd.Form.txtDescription.SetFocus 'set focus on the object
+                    Exit Sub
+                End If
+            End If
+        End If
+    End If
+End If
+If MsgBox("If you continue you will be officially approving this Work Instruction." & vbNewLine & vbNewLine & "Would you like to continue?", vbYesNo + vbQuestion) = vbNo Then
+    Exit Sub
+End If
+'*********************Export report as PDF***********************************
+Dim DValue As String ' Dvalue for date with specific format
+DValue = Format(Date, "mm-dd-yyyy")
+strFile = "J:\Paper\VPAU\DATA\ALLSHARE\ISO_9001\8 Operation\8.5 Production and Service Provision\8.5.1 Control of Production and Service Provision\Work Instructions\Completed Access\" & Me.txtTitle.Value & "_" & Me.txtAuthor.Value & "_" & DValue & "_Rev " & Me.txtNewRevisionNumber.Value & " _WIKey_" & Me.txtWIKey.Value & ".pdf"
+DoCmd.OutputTo acOutputReport, "rptApproveWI", acFormatPDF, strFile
+    
+
+'*****************Loop to fill out all records to be saved*******************
+Set dbTraining = CurrentDb 'working with current database
+Set rsWI = dbTraining.OpenRecordset("tblWI") 'set recordset to WI table
+If Not (rsWI.EOF And rsWI.BOF) Then 'If not the start or end of rs
+    rsWI.MoveFirst 'start at the beginning
+    Do Until rsWI.EOF = True 'go until the end
+        If rsWI!fldWIKey.Value = Me.txtWIKey.Value Then 'if foreign key is same as current page then:
+            rsWI.Edit 'open to edit
+            rsWI("fldCheck").Value = "1" 'change check value to assure record retention
+            rsWI("fldRevisionNumber").Value = Me.txtNewRevisionNumber.Value 'fill in process values to records
+            rsWI("fldApprovedBy").Value = Me.txtApprovedBy 'fill in process values to records
+            rsWI("fldProcess").Value = Me.txtList.Value 'fill in process values to records
+            rsWI.Update
+        End If
+        rsWI.MoveNext
+    Loop
+End If
+
+
+'************************Add new record to WI table****************************
+Set dbTraining = CurrentDb
+Set rsWI = dbTraining.OpenRecordset("tblJSAWI")
+
+rsWI.AddNew
+    rsWI![FileType] = "Work Instructions"
+    rsWI![FileName] = Me.txtTitle.Value
+    rsWI![Upload Date] = DValue
+    rsWI![Process] = Me.txtList.Value
+    rsWI![fldLink] = strFile
+    rsWI![fldCheck] = "1"
+rsWI.Update
+rsWI.close
+
+'Send email
+Dim DValue As String ' Dvalue for date with specific format
+DValue = Format(Date, "mm-dd-yyyy")
+
+DoCmd.OutputTo acOutputReport, "rptCreateWI", acFormatPDF, "J:\Paper\VPAU\DATA\ALLSHARE\ISO_9001\8 Operation\8.5 Production and Service Provision\8.5.1 Control of Production and Service Provision\Work Instructions\Waiting To Be Approved\" & Me.txtTitle.Value & "_" & Me.txtAuthor.Value & "_" & DValue & "_Rev 0_WIKey_" & Me.txtPrimaryKey.Value & ".pdf"
+    
+'*******************Send Email Notification**************************
+If MsgBox("Would You like to send an email to request approval of this work instruction?", vbYesNo + vbQuestion) = vbYes Then
+    DoCmd.SendObject acSendReport, "rptCreateWI", acFormatPDF, "Alhagie.Taal@voith.com", "Matthew.lawrence@voith.com", , "A new Work Instruction has been submitted for your approval.", Me.txtAuthor.Value & " has created a new work instruction with the title of: " & Me.txtTitle.Value & ". The Work Instruction was created on " & DValue & "." & vbNewLine & vbNewLine & "Click on the attachment to view the work instruction" & vbNewLine & vbNewLine & "To edit and approve the work instruction follow the file path below to log into the database." & vbNewLine & vbNewLine & "Once in the database navigate to Add > Approve Work Instruction." & vbNewLine & vbNewLine & "Once there, search to find the correct work instruction by entering the title: (" & Me.txtTitle.Value & ") or by entering the WIKey: (" & Me.txtPrimaryKey.Value & ")" & vbNewLine & vbNewLine & "<J:\Paper\VPAU\DATA\ALLSHARE\ISO_9001\7 Support\7.2 Competence\Employee Training\Training Database\Training Database login.accdb>", True
+    MsgBox "Work Instruction has been saved, and email sent."
+    DoCmd.close acForm, "frmCreateWorkInstructions", acSaveYes
+    Exit Sub
+End If
+
+
+Me.Undo
+DoCmd.close acForm, "frmApproveWorkInstructions", acSaveNo
+MsgBox "Work instruction has been saved."
+Exit Sub
+
+ErrorExit:
+
+Call LogError(Err.Number, Err.Description, "btnSave_click", "frmApproveWorkInstructions")
+End Sub
